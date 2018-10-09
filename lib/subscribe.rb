@@ -14,18 +14,44 @@ module SlackWormhole
       subscriber = subscription.listen do |received_message|
         received_message.acknowledge!
         data =  received_message.grpc.message.attributes
+
+        return nil unless allowed_channel?(data['room'])
+
         case data['action']
         when 'post'
           payload = {
-            channel: data['channel'],
+            channel: data['room'],
             username: data['username'],
             icon_url: data['icon_url'],
             text: data['text'],
             as_user: false,
           }
           message = post_message(payload)
-        when 'edit'
+          save_message(subscription_name, message, data['timestamp'])
+        when 'update'
+          query = datastore.query(subscription_name).
+            where('originalTs', '=', data['timestamp']).
+            limit(1)
+          datastore.run(query).each do |task|
+            payload = {
+              channel: task['channelID'],
+              text: data['text'],
+              ts: task['timestamp']
+            }
+            edit_message(payload)
+          end
         when 'delete'
+          query = datastore.query(subscription_name).
+            where('originalTs', '=', data['timestamp']).
+            limit(1)
+          datastore.run(query).each do |task|
+            payload = {
+              channel: task['channelID'],
+              ts: task['timestamp']
+            }
+            delete_message(payload)
+            datastore.delete(task)
+          end
         end
       end
       subscriber.start
@@ -40,7 +66,22 @@ module SlackWormhole
     end
 
     def self.delete_message(payload)
-      web.chat_delete
+      web.chat_delete(payload)
+    end
+
+    def self.save_message(entity_name, message, original_timestamp)
+      task = datastore.entity entity_name do |t|
+        t["originalTs"] = original_timestamp
+        t["timestamp"] = message.ts
+        t["channelID"] = message.channel
+      end
+
+      datastore.save(task)
+    end
+
+    def self.allowed_channel?(channel)
+      allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS'].split(',')
+      return allowed_channels && allowed_channels.include?(channel)
     end
 
   end

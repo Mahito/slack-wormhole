@@ -6,11 +6,16 @@ module SlackWormhole
       rtm.on :message do |data|
         case data.subtype
         when nil
-          post_message(data)
+          if data.files
+            post_files(data)
+          else
+            post_message(data)
+          end
         when 'bot_message'
-        when 'file_share'
         when 'message_changed'
+          edit_message(data)
         when 'message_deleted'
+          delete_message(data)
         end
       end
 
@@ -26,17 +31,46 @@ module SlackWormhole
         channel_name = channel(data.channel).name
 
         payload = {
-          action: "post",
+          action: 'post',
           timestamp: data.ts,
-          channel: channel_name,
+          room: channel_name,
           username: username,
           icon_url: icon,
           text: data.text,
-          as_user: false,
         }
 
         publish(payload)
       end
+    end
+
+    def self.post_files(data)
+        payload = {
+          channel: data.channel,
+          text: 'ファイル転送はまだてきてません。PR待ってます☆ミ',
+          as_user: false
+        }
+      web.chat_postMessage(payload)
+    end
+
+    def self.edit_message(data)
+      if user = user(data.message.user)
+        payload = {
+          action: 'update',
+          timestamp: data.message.ts,
+          text: data.message.text,
+        }
+
+        publish(payload)
+      end
+    end
+
+    def self.delete_message(data)
+      payload = {
+        action: 'delete',
+        timestamp: data.deleted_ts,
+      }
+
+      publish(payload)
     end
 
     def self.publish(payload)

@@ -1,3 +1,4 @@
+require "google/cloud/datastore"
 require 'google/cloud/pubsub'
 require 'slack-ruby-client'
 
@@ -7,6 +8,17 @@ Slack.configure do |config|
 
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::INFO
+end
+
+def datastore
+  if @datastore
+    @datastore
+  else
+    @datastore = Google::Cloud::Datastore.new(
+      project_id: ENV['GCP_PROJECT'],
+      credentials: ENV['GOOGLE_APPLICATION_CREDENTIALS']
+    )
+  end
 end
 
 def pubsub
