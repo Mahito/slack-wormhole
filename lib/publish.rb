@@ -19,6 +19,14 @@ module SlackWormhole
         end
       end
 
+      rtm.on :reaction_added do |data|
+        post_reaction(data)
+      end
+
+      rtm.on :reaction_removed do |data|
+        remove_reaction(data)
+      end
+
       rtm.start!
     end
 
@@ -28,12 +36,11 @@ module SlackWormhole
           user.profile.real_name ||
           user.name
         icon = user.profile.image_192
-        channel_name = channel(data.channel).name
 
         payload = {
           action: 'post',
           timestamp: data.ts,
-          room: channel_name,
+          room: channel(data.channel).name,
           username: username,
           icon_url: icon,
           text: data.text,
@@ -45,7 +52,7 @@ module SlackWormhole
 
     def self.post_files(data)
         payload = {
-          channel: data.channel,
+          room: channel(data.channel).name,
           text: 'ファイル転送はまだてきてません。PR待ってます☆ミ',
           as_user: false
         }
@@ -56,6 +63,7 @@ module SlackWormhole
       if user = user(data.message.user)
         payload = {
           action: 'update',
+          room: channel(data.channel).name,
           timestamp: data.message.ts,
           text: data.message.text,
         }
@@ -66,8 +74,45 @@ module SlackWormhole
 
     def self.delete_message(data)
       payload = {
+        room: channel(data.channel).name,
         action: 'delete',
         timestamp: data.deleted_ts,
+      }
+
+      publish(payload)
+    end
+
+    def self.post_reaction(data)
+      if user = user(data.user)
+        username = user.profile.display_name ||
+          user.profile.real_name ||
+          user.name
+        icon = user.profile.image_192
+
+        payload = {
+          action: 'reaction_add',
+          timestamp: data.ts,
+          thread_ts: data.item.ts,
+          room: channel(data.item.channel).name,
+          username: username,
+          icon_url: icon,
+          text: ":#{data.reaction}:",
+        }
+
+        publish(payload)
+      end
+    end
+
+    def self.remove_reaction(data)
+      user = user(data.user)
+      username = user.profile.display_name ||
+        user.profile.real_name ||
+        user.name
+      payload = {
+        action: 'reaction_remove',
+        room: channel(data.item.channel).name,
+        username: username,
+        timestamp: data.item.ts,
       }
 
       publish(payload)

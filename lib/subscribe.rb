@@ -52,6 +52,35 @@ module SlackWormhole
             delete_message(payload)
             datastore.delete(task)
           end
+        when 'reaction_add'
+          query = datastore.query(subscription_name).
+            where('originalTs', '=', data['thread_ts']).
+            limit(1)
+          datastore.run(query).each do |task|
+            payload = {
+              channel: task['channelID'],
+              thread_ts: task['timestamp'],
+              text: data['text'],
+              username: data['username'],
+              icon_url: data['icon_url'],
+              as_user: false,
+            }
+            message = post_message(payload)
+            save_message(subscription_name, message, data['thread_ts'], data['username'])
+          end
+        when 'reaction_remove'
+          query = datastore.query(subscription_name).
+            where('originalTs', '=', data['timestamp']).
+            where('user', '=', data['username']).
+            limit(1)
+          datastore.run(query).each do |task|
+            payload = {
+              channel: task['channelID'],
+              ts: task['timestamp']
+            }
+            delete_message(payload)
+            datastore.delete(task)
+          end
         end
       end
       subscriber.start
@@ -69,19 +98,20 @@ module SlackWormhole
       web.chat_delete(payload)
     end
 
-    def self.save_message(entity_name, message, original_timestamp)
+    def self.save_message(entity_name, message, original_timestamp, user='')
       task = datastore.entity entity_name do |t|
         t["originalTs"] = original_timestamp
         t["timestamp"] = message.ts
         t["channelID"] = message.channel
+        t['user'] = user
       end
 
       datastore.save(task)
     end
 
     def self.allowed_channel?(channel)
-      allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS'].split(',')
-      return allowed_channels && allowed_channels.include?(channel)
+      allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS']
+      return allowed_channels && allowed_channels.split(',').include?(channel)
     end
 
   end
