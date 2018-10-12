@@ -6,6 +6,8 @@ Slack.configure do |config|
   config.token = ENV['SLACK_API_TOKEN']
   raise 'Missing ENV[SLACK_API_TOKEN]!' unless config.token
 
+  STDOUT.sync = true
+
   config.logger = Logger.new(STDOUT)
   config.logger.level = Logger::INFO
 end
@@ -15,7 +17,7 @@ def datastore
     @datastore
   else
     @datastore = Google::Cloud::Datastore.new(
-      project_id: ENV['GCP_PROJECT'],
+      project_id: ENV['GCP_PROJECT_ID'],
       credentials: ENV['GOOGLE_APPLICATION_CREDENTIALS']
     )
   end
@@ -26,7 +28,7 @@ def pubsub
     @pubsub
   else
     @pubsub = Google::Cloud::Pubsub.new(
-      project_id: ENV['GCP_PROJECT'],
+      project_id: ENV['GCP_PROJECT_ID'],
       credentials: ENV['GOOGLE_APPLICATION_CREDENTIALS']
     )
   end
