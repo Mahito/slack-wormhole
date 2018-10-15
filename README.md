@@ -26,11 +26,12 @@ $ bundle install --path vendor/bundle
    複数チームをSubscribeするのであれば複数のTopicにSubscriptionを作成すること.
 
 ### Google Cloud Datastore
-
+i
 1. Subscriptionと同じ名前のエンティティを作成
 2. 各種プロパティは以下の通り
 
 |Name|Type|Value|Indexing|
+|--|--|--|--|
 |channelID|string||true|
 |originalTs|string||true|
 |timestamp|string||true|
