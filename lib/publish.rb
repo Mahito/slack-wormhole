@@ -8,6 +8,8 @@ module SlackWormhole
         when nil
           if data.files
             post_files(data)
+          elsif data.thread_ts
+            post_reply(data)
           else
             post_message(data)
           end
@@ -113,6 +115,27 @@ module SlackWormhole
         room: channel(data.item.channel).name,
         username: username,
         timestamp: data.item.ts,
+      }
+
+      publish(payload)
+    end
+
+    def self.post_reply(data)
+      user = user(data.user)
+      username = user.profile.display_name ||
+        user.profile.real_name ||
+        user.name
+
+      icon = user.profile.image_192
+
+      payload = {
+        action: 'post_reply',
+        thread_ts: data.thread_ts,
+        timestamp: data.ts,
+        room: channel(data.channel).name,
+        username: username,
+        icon_url: icon,
+        text: data.text,
       }
 
       publish(payload)

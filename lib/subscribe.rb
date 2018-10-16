@@ -81,6 +81,22 @@ module SlackWormhole
             delete_message(payload)
             datastore.delete(task)
           end
+        when 'post_reply'
+          query = datastore.query(subscription_name).
+            where('originalTs', '=', data['thread_ts']).
+            limit(1)
+          datastore.run(query).each do |task|
+            payload = {
+              channel: task['channelID'],
+              thread_ts: task['timestamp'],
+              text: data['text'],
+              username: data['username'],
+              icon_url: data['icon_url'],
+              as_user: false,
+            }
+            message = post_message(payload)
+            save_message(subscription_name, message, data['timestamp'])
+          end
         end
       end
       subscriber.start
