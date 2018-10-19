@@ -29,6 +29,12 @@ module SlackWormhole
         remove_reaction(data)
       end
 
+      rtm.on :closed do |data|
+        rtm.stop! if rtm.started?
+        sleep(5)
+        rtm.start!
+      end
+
       rtm.start!
     end
 
