@@ -30,12 +30,10 @@ module SlackWormhole
       end
 
       rtm.on :closed do |data|
-        rtm.stop! if rtm.started?
-        sleep(5)
-        rtm.start!
+        rtm_start!
       end
 
-      rtm.start!
+      rtm_start!
     end
 
     def self.post_message(data)
@@ -59,11 +57,11 @@ module SlackWormhole
     end
 
     def self.post_files(data)
-        payload = {
-          room: channel(data.channel).name,
-          text: 'ファイル転送はまだてきてません。PR待ってます☆ミ',
-          as_user: false
-        }
+      payload = {
+        room: channel(data.channel).name,
+        text: 'ファイル転送はまだてきてません。PR待ってます☆ミ',
+        as_user: false
+      }
       web.chat_postMessage(payload)
     end
 
@@ -149,6 +147,17 @@ module SlackWormhole
 
     def self.publish(payload)
       topic.publish(payload)
+    end
+
+    private
+    def self.rtm_start!
+      rtm.stop! if rtm.started?
+      sleep(1)
+      begin
+        rtm.start!
+      rescue Errno::EPIPE
+        rtm_start!
+      end
     end
   end
 end
