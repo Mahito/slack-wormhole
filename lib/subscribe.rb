@@ -90,32 +90,28 @@ module SlackWormhole
             icon_url: data['icon_url'],
             as_user: false,
           }
-          p payload['thread_ts']
 
           query = datastore.query(subscription_name).
-            where('originalTs', '=', data['thread_ts']).
-            limit(1)
+              where('timestamp', '=', data['thread_ts']).
+              limit(1)
           tasks = datastore.run(query)
 
-          if tasks.size > 0
+          if tasks.size >  0
             tasks.each do |task|
-              payload['thread_ts'] = task['timestamp']
+              payload[:thread_ts] = task['originalTs']
             end
-            p payload['thread_ts']
           else
             query = datastore.query(subscription_name).
-              where('timestamp', '=', data['thread_ts']).
+              where('originalTs', '=', data['thread_ts']).
               limit(1)
             tasks = datastore.run(query)
 
             if tasks.size > 0
               tasks.each do |task|
-                payload['thread_ts'] = task['originalTs']
+                payload[:thread_ts] = task['timestamp']
               end
             end
-            p payload['thread_ts']
           end
-          p payload['thread_ts']
           message = post_message(payload)
           save_message(subscription_name, message, data['timestamp'])
         end

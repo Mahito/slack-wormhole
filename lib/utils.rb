@@ -12,6 +12,14 @@ Slack.configure do |config|
   config.logger.level = Logger::INFO
 end
 
+def logger
+  if @logger
+    @logger
+  else
+    @logger = Logger.new(STDOUT)
+  end
+end
+
 def datastore
   if @datastore
     @datastore

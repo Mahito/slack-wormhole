@@ -142,9 +142,6 @@ module SlackWormhole
         text: data.text,
       }
 
-      puts 'publish'
-      p data
-      p payload[:thread_ts]
       publish(payload)
     end
 
@@ -157,8 +154,10 @@ module SlackWormhole
       rtm.stop! if rtm.started?
       sleep(1)
       begin
-        rtm.start!
-      rescue Errno::EPIPE
+        thread = rtm.start_async
+        thread.join
+      rescue Errno::EPIPE => e
+        logger.error(e)
         rtm_start!
       end
     end
