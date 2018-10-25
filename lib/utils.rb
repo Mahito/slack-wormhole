@@ -12,18 +12,6 @@ Slack.configure do |config|
   config.logger.level = Logger::INFO
 end
 
-module GCPLogger
-  LOGGER = Logger.new STDOUT, level: Logger::INFO
-  def logger
-    LOGGER
-  end
-end
-
-# Define a gRPC module-level logger method before grpc/logconfig.rb loads.
-module GRPC
-  extend GCPLogger
-end
-
 def datastore
   if @datastore
     @datastore

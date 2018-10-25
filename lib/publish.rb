@@ -142,6 +142,9 @@ module SlackWormhole
         text: data.text,
       }
 
+      puts 'publish'
+      p data
+      p payload[:thread_ts]
       publish(payload)
     end
 
