@@ -26,8 +26,8 @@ $ bundle install --path vendor/bundle
    複数チームをSubscribeするのであれば複数のTopicにSubscriptionを作成すること.
 
 ### Google Cloud Datastore
-i
-1. Subscriptionと同じ名前のエンティティを作成
+
+1. WORMHOLE_ENTITY_NAMEと同じ名前のエンティティを作成
 2. 各種プロパティは以下の通り
 
 |Name|Type|Value|Indexing|
@@ -46,6 +46,7 @@ i
 |GOOGLE_APPLICATION_CREDENTIALS|string|Path to GCP credential|
 |WORMHOLE_TOPIC_NAME|string|Topic Name for publish at Cloud PubSub|
 |WORMHOLE_SUBSCRIPTION_NAMES|string|Subscriptuon names for subscribe at Cloud PubSub|
+|WORMHOLE_ENTITY_NAME|string|Entity name at Cloud Datastore|
 |WORMHOLE_ALLOW_CHANNELS|string|Channel names that allow receiving|
 
 ## Quick Start

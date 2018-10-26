@@ -51,6 +51,10 @@ def topic
   end
 end
 
+def query
+  query = datastore.query(ENV['WORMHOLE_ENTITY_NAME']).
+end
+
 def rtm
   if @rtm
     @rtm
