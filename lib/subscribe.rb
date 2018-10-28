@@ -15,7 +15,10 @@ module SlackWormhole
         received_message.acknowledge!
         data =  received_message.grpc.message.attributes
 
-        return nil unless allowed_channel?(data['room'])
+        unless allowed_channel?(data['room'])
+          logger.info("\"#{data['room']}\" is not allowed to receive channel !")
+          return nil
+        end
 
         case data['action']
         when 'post'
