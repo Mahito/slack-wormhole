@@ -1,6 +1,6 @@
 FROM ruby:2.4
 MAINTAINER Mahito <earthdragon77@gmail.com>
-RUN apt update && apt upgrade -y
+RUN apt update && apt upgrade -y && apt install -y locales locales-all
 
 RUN mkdir /slack-wormhole
 WORKDIR /slack-wormhole
