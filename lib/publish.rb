@@ -58,7 +58,7 @@ module SlackWormhole
 
     def self.post_files(data)
       payload = {
-        room: channel(data.channel).name,
+        channel: data.channel,
         text: 'ファイル転送はまだてきてません。PR待ってます☆ミ',
         as_user: false
       }
