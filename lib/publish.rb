@@ -29,7 +29,13 @@ module SlackWormhole
         remove_reaction(data)
       end
 
+      rtm.on :close do |data|
+        logger.info('Received a close event from Slack')
+        rtm_start!
+      end
+
       rtm.on :closed do |data|
+        logger.info('RTM connection has been closed')
         rtm_start!
       end
 
@@ -152,19 +158,17 @@ module SlackWormhole
 
     def self.publish(payload)
       topic.publish(payload)
+      logger.info("Message has been published - Action[#{payload[:action]}]")
     end
 
     private
     def self.rtm_start!
       rtm.stop! if rtm.started?
-      sleep(1)
-      begin
-        thread = rtm.start_async
-        thread.join
-      rescue Errno::EPIPE => e
-        logger.error(e)
-        rtm_start!
-      end
+      thread = rtm.start_async
+      thread.join
+    rescue => e
+      logger.error(e)
+      rtm_start!
     end
   end
 end
