@@ -58,7 +58,7 @@ $ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credential
 $ export WORMHOLE_TOPIC_NAME=topic_name
 $ export WORMHOLE_SUBSCRIPTION_NAMES=subscription1,subscription2,subscription3
 $ export WORMHOLE_ALLOW_CHANNELS=general,random,wormhole
-$ bundle exec lib/slack_wormhole.rb
+$ bundle exec ruby lib/slack_wormhole.rb
 ```
 
 ## Contributing
@@ -73,5 +73,5 @@ $ git clone https://github.com/Mahito/slack-wormhole.git
 $ cd slack-wormhole
 $ gem install bundle
 $ bundle install --path vendor/bundle
-$ bundle exec lib/slack_wormhole.rb
+$ bundle exec ruby lib/slack_wormhole.rb
 ```
