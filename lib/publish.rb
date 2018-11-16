@@ -166,7 +166,7 @@ module SlackWormhole
       rtm.stop! if rtm.started?
       thread = rtm.start_async
       thread.join
-    rescue => e
+    rescue Exception => e
       logger.error(e)
       rtm_start!
     end
