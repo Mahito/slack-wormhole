@@ -163,11 +163,23 @@ module SlackWormhole
 
     private
     def self.rtm_start!
-      rtm.stop! if rtm.started?
       thread = rtm.start_async
+
+      Thread.new do
+        loop do
+          sleep 5
+          rtm.ping
+        end
+      end
+
       thread.join
+    rescue Interrupt => e
+      logger.error(e)
+      raise Interrupt
     rescue Exception => e
       logger.error(e)
+      sleep 5
+      rtm.stop!
       rtm_start!
     end
   end
