@@ -64,11 +64,12 @@ module SlackWormhole
 
     def self.post_files(data)
       payload = {
-        channel: data.channel,
-        text: 'ファイル転送はまだてきてません。PR待ってます☆ミ',
-        as_user: false
+        file: data['files'][0]['id']
       }
-      web.chat_postMessage(payload)
+
+      web.files_sharedPublicURL(payload)
+      data.text += "\n" + data.files[0].permalink_public
+      post_message(data)
     end
 
     def self.edit_message(data)
