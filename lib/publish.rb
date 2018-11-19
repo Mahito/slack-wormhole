@@ -157,8 +157,14 @@ module SlackWormhole
     end
 
     def self.publish(payload)
-      topic.publish(payload)
-      logger.info("Message has been published - Action[#{payload[:action]}]")
+      begin
+        topic.publish(payload)
+        logger.info("Message has been published - Action[#{payload[:action]}]")
+      rescue => e
+        logger.error(e)
+        sleep 5
+        retry
+      end
     end
 
     private
