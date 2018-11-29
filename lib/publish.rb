@@ -111,6 +111,11 @@ module SlackWormhole
           text: ":#{data.reaction}:",
         }
 
+        q = query.where('timestamp', '=', payload[:thread_ts]).limit(1)
+        datastore.run(q).each do |task|
+          payload[:thread_ts] = task['originalTs']
+        end
+
         publish(payload)
       end
     end
