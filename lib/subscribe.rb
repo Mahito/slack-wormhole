@@ -64,9 +64,10 @@ module SlackWormhole
           q = query.where('originalTs', '=', data['thread_ts']).limit(1)
           datastore.run(q).each do |task|
             payload[:thread_ts] = task['timestamp']
-            message = post_message(payload)
-            save_message(subscription_name, message, data['thread_ts'], data['username'])
           end
+
+          message = post_message(payload)
+          save_message(subscription_name, message, data['thread_ts'], data['username'])
         when 'reaction_remove'
           q = query.
             where('originalTs', '=', data['timestamp']).
