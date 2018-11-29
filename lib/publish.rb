@@ -160,6 +160,14 @@ module SlackWormhole
       begin
         topic.publish(payload)
         logger.info("Message has been published - Action[#{payload[:action]}]")
+      rescue Google::Cloud::InvalidArgumentError => e
+        logger.error(e)
+        error_payload = {
+          channel: payload[:room],
+          text: 'Error - ' + e.message,
+          as_user: false
+        }
+        web.chat_postMessage(error_payload)
       rescue => e
         logger.error(e)
         sleep 5
