@@ -52,16 +52,18 @@ module SlackWormhole
             datastore.delete(task)
           end
         when 'reaction_add'
+          payload = {
+            channel: data['room'],
+            thread_ts: data['thread_ts'],
+            text: data['text'],
+            username: data['username'],
+            icon_url: data['icon_url'],
+            as_user: false,
+          }
+
           q = query.where('originalTs', '=', data['thread_ts']).limit(1)
           datastore.run(q).each do |task|
-            payload = {
-              channel: task['channelID'],
-              thread_ts: task['timestamp'],
-              text: data['text'],
-              username: data['username'],
-              icon_url: data['icon_url'],
-              as_user: false,
-            }
+            payload[:thread_ts] = task['timestamp']
             message = post_message(payload)
             save_message(subscription_name, message, data['thread_ts'], data['username'])
           end
