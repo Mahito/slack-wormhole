@@ -41,7 +41,8 @@ $ bundle install --path vendor/bundle
 
 |Env|Value|Description|
 |--|--|--|
-|SLACK_API_TOKEN|string|Slack API token|
+|SLACK_API_USER_TOKEN|string|Slack API USER token|
+|SLACK_API_BOT_TOKEN|string|Slack API BOT token|
 |GCP_PROJECT_ID|string|Project ID of GCP|
 |GOOGLE_APPLICATION_CREDENTIALS|string|Path to GCP credential|
 |WORMHOLE_TOPIC_NAME|string|Topic Name for publish at Cloud PubSub|
@@ -52,7 +53,8 @@ $ bundle install --path vendor/bundle
 ## Quick Start
 
 ```
-$ export SLACK_API_TOKEN=xxxxxxxxxxxx
+$ export SLACK_API_USER_TOKEN=xxxxxxxxxxxx
+$ export SLACK_API_BOT_TOKEN=xxxxxxxxxxxx
 $ export GCP_PROJECT_ID=xxx-xxxx
 $ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credential
 $ export WORMHOLE_TOPIC_NAME=topic_name
