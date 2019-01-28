@@ -88,3 +88,10 @@ end
 def user(id)
   web.users_info(user: id).user if id
 end
+
+def username(user)
+  username = user.profile.display_name
+  username = user.real_name if username == ""
+  username = user.name if username == ""
+  return username
+end
