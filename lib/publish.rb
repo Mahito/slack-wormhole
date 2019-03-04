@@ -66,7 +66,7 @@ module SlackWormhole
       }
 
       web.files_sharedPublicURL(payload)
-      data.text += "\n" + data.files[0].permalink_public
+      data.text += "\n" + data.files[0].permalink
       post_message(data)
     end
 
