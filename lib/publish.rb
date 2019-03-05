@@ -65,8 +65,8 @@ module SlackWormhole
         file: data['files'][0]['id']
       }
 
-      web.files_sharedPublicURL(payload)
-      data.text += "\n" + data.files[0].permalink
+      res = web.files_sharedPublicURL(payload)
+      data.text += "\n" + res['file']['permalink_public']
       post_message(data)
     end
 
