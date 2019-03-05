@@ -66,12 +66,7 @@ module SlackWormhole
       }
 
       res = web.files_sharedPublicURL(payload)
-      if res['file']['thumb_360'] != ""
-        url = res['file']['thumb_360']
-      else
-        url = res['file']['permalink_public']
-      end
-      data.text += "\n" + url
+      data.text += "\n" + res['file']['permalink_public']
       post_message(data)
     end
 
