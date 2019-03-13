@@ -52,35 +52,9 @@ module SlackWormhole
             datastore.delete(task)
           end
         when 'reaction_add'
-          payload = {
-            channel: data['room'],
-            thread_ts: data['thread_ts'],
-            text: data['text'],
-            username: data['username'],
-            icon_url: data['icon_url'],
-            as_user: false,
-          }
-
-          q = query.where('originalTs', '=', data['thread_ts']).limit(1)
-          datastore.run(q).each do |task|
-            payload[:thread_ts] = task['timestamp']
-          end
-
-          message = post_message(payload)
-          save_message(subscription_name, message, data['thread_ts'], data['username'])
+          add_reaction(data)
         when 'reaction_remove'
-          q = query.
-            where('originalTs', '=', data['timestamp']).
-            where('user', '=', data['username']).
-            limit(1)
-          datastore.run(q).each do |task|
-            payload = {
-              channel: task['channelID'],
-              ts: task['timestamp']
-            }
-            delete_message(payload)
-            datastore.delete(task)
-          end
+          removed_reaction(data)
         when 'post_reply'
           payload = {
             channel: data['room'],
@@ -115,15 +89,51 @@ module SlackWormhole
       web.chat_delete(payload)
     end
 
-    def self.save_message(entity_name, message, original_timestamp, user='')
+    def self.save_message(entity_name, message, original_timestamp, user='', reaction='')
       task = datastore.entity entity_name do |t|
         t["originalTs"] = original_timestamp
         t["timestamp"] = message.ts
         t["channelID"] = message.channel
         t['user'] = user
+        t['reaction'] = reaction
       end
 
       datastore.save(task)
+    end
+
+    def self.add_reaction(data)
+      payload = {
+        channel: data['room'],
+        thread_ts: data['thread_ts'],
+        text: ":#{data['reaction']}:",
+        username: data['username'],
+        icon_url: data['icon_url'],
+        as_user: false,
+      }
+
+      q = query.where('originalTs', '=', data['thread_ts']).limit(1)
+      datastore.run(q).each do |task|
+        payload[:thread_ts] = task['timestamp']
+      end
+
+      message = post_message(payload)
+      save_message(subscription_name, message, data['thread_ts'], data['userid'], data['reaction'])
+    end
+
+    def self.remove_reaction
+      q = query.
+        where('originalTs', '=', data['timestamp']).
+        where('user', '=', data['userid']).
+        where('reaction', '=', data['reaction']).
+        limit(1)
+      datastore.run(q).each do |task|
+        payload = {
+          channel: task['channelID'],
+          ts: task['timestamp']
+        }
+        delete_message(payload)
+        datastore.delete(task)
+      end
     end
 
     def self.allowed_channel?(channel)

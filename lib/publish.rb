@@ -103,9 +103,10 @@ module SlackWormhole
           timestamp: data.ts,
           thread_ts: data.item.ts,
           room: channel(data.item.channel).name,
+          userid: data.user,
           username: name,
           icon_url: icon,
-          text: ":#{data.reaction}:",
+          reaction: data.reaction,
         }
 
         q = query.where('timestamp', '=', payload[:thread_ts]).limit(1)
@@ -123,7 +124,9 @@ module SlackWormhole
       payload = {
         action: 'reaction_remove',
         room: channel(data.item.channel).name,
+        userid: data.user,
         username: name,
+        reaction: data.reaction,
         timestamp: data.item.ts,
       }
 

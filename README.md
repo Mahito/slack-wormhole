@@ -36,6 +36,7 @@ $ bundle install --path vendor/bundle
 |originalTs|string||true|
 |timestamp|string||true|
 |user|string||true|
+|reaction|string||true|
 
 ### Environment Variables
 
