@@ -52,7 +52,7 @@ module SlackWormhole
             datastore.delete(task)
           end
         when 'reaction_add'
-          add_reaction(data)
+          add_reaction(subscription_name, data)
         when 'reaction_remove'
           remove_reaction(data)
         when 'post_reply'
@@ -101,7 +101,7 @@ module SlackWormhole
       datastore.save(task)
     end
 
-    def self.add_reaction(data)
+    def self.add_reaction(subscription_name, data)
       payload = {
         channel: data['room'],
         thread_ts: data['thread_ts'],
@@ -110,7 +110,6 @@ module SlackWormhole
         icon_url: data['icon_url'],
         as_user: false,
       }
-
       q = query.where('originalTs', '=', data['thread_ts']).limit(1)
       datastore.run(q).each do |task|
         payload[:thread_ts] = task['timestamp']
