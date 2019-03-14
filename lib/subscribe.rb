@@ -54,7 +54,7 @@ module SlackWormhole
         when 'reaction_add'
           add_reaction(data)
         when 'reaction_remove'
-          removed_reaction(data)
+          remove_reaction(data)
         when 'post_reply'
           payload = {
             channel: data['room'],
@@ -120,7 +120,7 @@ module SlackWormhole
       save_message(subscription_name, message, data['thread_ts'], data['userid'], data['reaction'])
     end
 
-    def self.remove_reaction
+    def self.remove_reaction(data)
       q = query.
         where('originalTs', '=', data['timestamp']).
         where('user', '=', data['userid']).
