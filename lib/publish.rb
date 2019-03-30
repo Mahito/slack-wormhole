@@ -18,6 +18,12 @@ module SlackWormhole
           edit_message(data)
         when 'message_deleted'
           delete_message(data)
+        when 'channel_join', 'channel_leave'
+          if user = user(data.user)
+            name = username(user)
+            data.text.sub!(/<.+>/, name)
+          end
+          post_message(data)
         end
       end
 
