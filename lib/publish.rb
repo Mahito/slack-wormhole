@@ -22,6 +22,7 @@ module SlackWormhole
           if user = user(data.user)
             name = username(user)
             data.text.sub!(/<.+>/, name)
+            data.user = nil
           end
           post_message(data)
         end
@@ -52,6 +53,7 @@ module SlackWormhole
       if user = user(data.user)
         name = username(user)
         icon = user.profile.image_192
+      end
 
         payload = {
           action: 'post',
@@ -63,7 +65,6 @@ module SlackWormhole
         }
 
         publish(payload)
-      end
     end
 
     def self.post_files(data)
@@ -140,9 +141,10 @@ module SlackWormhole
     end
 
     def self.post_reply(data)
-      user = user(data.user)
-      name = username(user)
-      icon = user.profile.image_192
+      if user = user(data.user)
+        name = username(user)
+        icon = user.profile.image_192
+      end
 
       payload = {
         action: 'post_reply',
