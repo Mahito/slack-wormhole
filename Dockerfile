@@ -17,5 +17,6 @@ RUN gem install bundler &&  mkdir /slack-wormhole
 WORKDIR /tmp
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 WORKDIR /slack-wormhole
+COPY Gemfile Gemfile.lock ./
 ADD lib ./lib
 CMD ["bundle","exec", "ruby", "./lib/slack_wormhole.rb"]
