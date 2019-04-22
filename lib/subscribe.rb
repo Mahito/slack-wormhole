@@ -63,6 +63,7 @@ module SlackWormhole
             username: data['username'],
             icon_url: data['icon_url'],
             as_user: false,
+            reply_broadcast: data['reply_broadcast']
           }
 
           q = query.where('originalTs', '=', data['thread_ts']).limit(1)

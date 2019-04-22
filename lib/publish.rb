@@ -25,6 +25,11 @@ module SlackWormhole
             data.user = nil
           end
           post_message(data)
+        when 'thread_broadcast'
+          if data.bot_id.nil?
+            data.reply_broadcast = true
+            post_reply(data)
+          end
         end
       end
 
@@ -55,16 +60,16 @@ module SlackWormhole
         icon = user.profile.image_192
       end
 
-        payload = {
-          action: 'post',
-          timestamp: data.ts,
-          room: channel(data.channel).name,
-          username: name,
-          icon_url: icon,
-          text: data.text,
-        }
+      payload = {
+        action: 'post',
+        timestamp: data.ts,
+        room: channel(data.channel).name,
+        username: name,
+        icon_url: icon,
+        text: data.text,
+      }
 
-        publish(payload)
+      publish(payload)
     end
 
     def self.post_files(data)
@@ -154,6 +159,7 @@ module SlackWormhole
         username: name,
         icon_url: icon,
         text: data.text,
+        reply_broadcast: data.reply_broadcast,
       }
 
       q = query.where('timestamp', '=', data.thread_ts).limit(1)
