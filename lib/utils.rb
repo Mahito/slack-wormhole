@@ -1,6 +1,8 @@
 require "google/cloud/datastore"
 require 'google/cloud/pubsub'
 require 'slack-ruby-client'
+require 'base64'
+require 'json'
 
 Slack::Web::Client.configure do |config|
   config.token = ENV['SLACK_API_USER_TOKEN']

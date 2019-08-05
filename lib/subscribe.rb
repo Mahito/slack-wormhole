@@ -13,7 +13,8 @@ module SlackWormhole
       subscription = pubsub.subscription(subscription_name)
       subscriber = subscription.listen do |received_message|
         received_message.acknowledge!
-        data =  received_message.grpc.message.attributes
+        json = Base64.strict_decode64(received_message.grpc.message.data)
+        data = JSON.load(json)
 
         unless allowed_channel?(data['room'])
           logger.info("\"#{data['room']}\" is not allowed to receive channel !")

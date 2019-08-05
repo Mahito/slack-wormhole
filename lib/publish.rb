@@ -172,7 +172,9 @@ module SlackWormhole
 
     def self.publish(payload)
       begin
-        topic.publish(payload)
+        json = JSON.dump(payload)
+        data = Base64.strict_encode64(json)
+        topic.publish(data)
         logger.info("Message has been published - Action[#{payload[:action]}]")
       rescue Google::Cloud::InvalidArgumentError => e
         logger.error(e)
