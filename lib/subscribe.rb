@@ -29,6 +29,7 @@ module SlackWormhole
             icon_url: data['icon_url'],
             text: data['text'],
             as_user: false,
+            unfurl_links: true,
           }
           message = post_message(payload)
           save_message(subscription_name, message, data['timestamp'])
