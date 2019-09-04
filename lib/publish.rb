@@ -172,6 +172,7 @@ module SlackWormhole
 
     def self.publish(payload)
       begin
+        payload = replace_username(payload)
         json = JSON.dump(payload)
         data = Base64.strict_encode64(json)
         topic.publish(data)
@@ -189,6 +190,15 @@ module SlackWormhole
         sleep 5
         retry
       end
+    end
+
+    def self.replace_username(payload)
+      text = payload[:text]
+      while match = text[/<@([UW].*?)>/, 1]
+        text.sub!('<@'+match+'>', '@' + username(user(match)))
+      end
+      payload[:text] = text
+      return payload
     end
 
     private
