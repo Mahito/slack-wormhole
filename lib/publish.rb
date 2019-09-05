@@ -194,6 +194,9 @@ module SlackWormhole
 
     def self.replace_username(payload)
       text = payload[:text]
+      if text.nil?
+        return payload
+      end
       while match = text[/<@([UW].*?)>/, 1]
         text.sub!('<@'+match+'>', '@' + username(user(match)))
       end
