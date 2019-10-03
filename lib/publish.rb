@@ -73,12 +73,14 @@ module SlackWormhole
     end
 
     def self.post_files(data)
-      payload = {
-        file: data['files'][0]['id']
-      }
+      data['files'].each do |f|
+        payload = {
+          file: f['id']
+        }
 
-      res = web.files_sharedPublicURL(payload)
-      data.text += "\n" + res['file']['permalink_public']
+        res = web.files_sharedPublicURL(payload)
+        data.text += "\n" + res['file']['permalink_public']
+      end
       post_message(data)
     end
 
