@@ -1,0 +1,30 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/github.com/mahito/slack-wormhole:latest'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - './Dockerfile.pub'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/github.com/mahito/slack-wormhole:publisher'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - './Dockerfile.sub'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/github.com/mahito/slack-wormhole:subscriber'
+      - '.'
+
+images:
+  - 'gcr.io/$PROJECT_ID/github.com/mahito/slack-wormhole:latest'
+  - 'gcr.io/$PROJECT_ID/github.com/mahito/slack-wormhole:publisher'
+  - 'gcr.io/$PROJECT_ID/github.com/mahito/slack-wormhole:subscriber'
