@@ -204,6 +204,7 @@ module SlackWormhole
 
     private
     def self.rtm_start!
+      rtm.stop! if rtm.started?
       rtm.start!
     rescue Interrupt => e
       logger.error(e)
