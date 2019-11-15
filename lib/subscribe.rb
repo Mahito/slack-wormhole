@@ -1,4 +1,6 @@
-require_relative  'utils'
+# frozen_string_literal: true
+
+require_relative 'utils'
 
 module SlackWormhole
   module Subscribe
@@ -14,7 +16,7 @@ module SlackWormhole
       subscriber = subscription.listen do |received_message|
         received_message.acknowledge!
         json = Base64.strict_decode64(received_message.grpc.message.data)
-        data = JSON.load(json)
+        data = JSON.parse(json)
 
         unless allowed_channel?(data['room'])
           logger.info("\"#{data['room']}\" is not allowed to receive channel !")
@@ -29,7 +31,7 @@ module SlackWormhole
             icon_url: data['icon_url'],
             text: data['text'],
             as_user: false,
-            unfurl_links: true,
+            unfurl_links: true
           }
           message = post_message(payload)
           save_message(subscription_name, message, data['timestamp'])
@@ -92,11 +94,11 @@ module SlackWormhole
       web.chat_delete(payload)
     end
 
-    def self.save_message(entity_name, message, original_timestamp, user='', reaction='')
+    def self.save_message(entity_name, message, original_timestamp, user = '', reaction = '')
       task = datastore.entity entity_name do |t|
-        t["originalTs"] = original_timestamp
-        t["timestamp"] = message.ts
-        t["channelID"] = message.channel
+        t['originalTs'] = original_timestamp
+        t['timestamp'] = message.ts
+        t['channelID'] = message.channel
         t['user'] = user
         t['reaction'] = reaction
       end
@@ -111,7 +113,7 @@ module SlackWormhole
         text: ":#{data['reaction']}:",
         username: data['username'],
         icon_url: data['icon_url'],
-        as_user: false,
+        as_user: false
       }
       q = query.where('originalTs', '=', data['thread_ts']).limit(1)
       datastore.run(q).each do |task|
@@ -123,11 +125,11 @@ module SlackWormhole
     end
 
     def self.remove_reaction(data)
-      q = query.
-        where('originalTs', '=', data['timestamp']).
-        where('user', '=', data['userid']).
-        where('reaction', '=', data['reaction']).
-        limit(1)
+      q = query
+          .where('originalTs', '=', data['timestamp'])
+          .where('user', '=', data['userid'])
+          .where('reaction', '=', data['reaction'])
+          .limit(1)
       datastore.run(q).each do |task|
         payload = {
           channel: task['channelID'],
@@ -140,8 +142,7 @@ module SlackWormhole
 
     def self.allowed_channel?(channel)
       allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS']
-      return allowed_channels && allowed_channels.split(',').include?(channel)
+      allowed_channels&.split(',')&.include?(channel)
     end
-
   end
 end

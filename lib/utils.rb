@@ -1,4 +1,6 @@
-require "google/cloud/datastore"
+# frozen_string_literal: true
+
+require 'google/cloud/datastore'
 require 'google/cloud/pubsub'
 require 'slack-ruby-client'
 require 'base64'
@@ -25,11 +27,7 @@ Slack::RealTime::Client.configure do |config|
 end
 
 def logger
-  if @logger
-    @logger
-  else
-    @logger = Logger.new(STDOUT)
-  end
+  @logger ||= Logger.new(STDOUT)
 end
 
 def datastore
@@ -55,32 +53,19 @@ def pubsub
 end
 
 def topic
-  if @topic
-    return @topic
-  else
-    topic_name = ENV['WORMHOLE_TOPIC_NAME']
-    @topic = pubsub.topic(topic_name)
-  end
+  @topic ||= pubsub.topic(ENV['WORMHOLE_TOPIC_NAME'])
 end
 
 def query
-  query = datastore.query(ENV['WORMHOLE_ENTITY_NAME'])
+  datastore.query(ENV['WORMHOLE_ENTITY_NAME'])
 end
 
 def rtm
-  if @rtm
-    @rtm
-  else
-    @rtm = Slack::RealTime::Client.new
-  end
+  @rtm ||= Slack::RealTime::Client.new
 end
 
 def web
-  if @web
-    @web
-  else
-    @web = Slack::Web::Client.new
-  end
+  @web ||= Slack::Web::Client.new
 end
 
 def channel(id)
@@ -93,7 +78,7 @@ end
 
 def username(user)
   username = user.profile.display_name
-  username = user.real_name if username == ""
-  username = user.name if username == ""
-  return username
+  username = user.real_name if username.empty?
+  username = user.name if username.empty?
+  username
 end
