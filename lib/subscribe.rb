@@ -3,6 +3,160 @@
 require_relative 'utils'
 
 module SlackWormhole
+  class Subscriber
+    def initializie(name)
+      @subscription = name
+    end
+
+    def subscribe
+      subscription = pubsub.subscription(@subscription)
+
+      subscriber = subscription.listen do |received_message|
+        received_message.acknowledge!
+        json = Base64.strict_decode64(received_message.grpc.message.data)
+        data = JSON.parse(json)
+
+        if allowed_channel?(data['room'])
+          self.send(event, data) if self.respond_to(event)
+        else
+          logger.info("\"#{data['room']}\" is not allowed to receive channel !")
+        end
+      end
+
+      subscriber.start
+    end
+
+    private
+
+    def post_message(payload)
+      web.chat_postMessage(payload)
+    end
+
+    def edit_message(payload)
+      web.chat_update(payload)
+    end
+
+    def delete_message(payload)
+      web.chat_delete(payload)
+    end
+
+    def self.save_message(entity_name, message, original_timestamp, user = '', reaction = '')
+      task = datastore.entity entity_name do |t|
+        t['originalTs'] = original_timestamp
+        t['timestamp'] = message.ts
+        t['channelID'] = message.channel
+        t['user'] = user
+        t['reaction'] = reaction
+      end
+
+      datastore.save(task)
+    end
+
+    def allowed_channel?(channel)
+      allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS']&.split(',')
+      allowed_channels ? allowed_channels.include?(channel) : true
+    end
+
+    def post(data)
+      payload = {
+        channel: data['room'],
+        username: data['username'],
+        icon_url: data['icon_url'],
+        text: data['text'],
+        as_user: false,
+        unfurl_links: true
+      }
+      message = post_message(payload)
+      save_message(@subscription, message, data['timestamp'])
+    end
+
+    def update(data)
+      q = query.where('originalTs', '=', data['timestamp']).limit(1)
+      datastore.run(q).each do |task|
+        payload = {
+          channel: task['channelID'],
+          text: data['text'],
+          ts: task['timestamp']
+        }
+        edit_message(payload)
+      end
+    end
+
+    def delete(data)
+      q = query.where('originalTs', '=', data['timestamp']).limit(1)
+      datastore.run(q).each do |task|
+        payload = {
+          channel: task['channelID'],
+          ts: task['timestamp']
+        }
+        delete_message(payload)
+        datastore.delete(task)
+      end
+    end
+
+    def reaction_add(data)
+      payload = {
+        channel: data['room'],
+        thread_ts: data['thread_ts'],
+        text: ":#{data['reaction']}:",
+        username: data['username'],
+        icon_url: data['icon_url'],
+        as_user: false
+      }
+      q = query.where('originalTs', '=', data['thread_ts']).limit(1)
+      datastore.run(q).each do |task|
+        payload[:thread_ts] = task['timestamp']
+      end
+
+      message = post_message(payload)
+      save_message(@subscription, message, data['thread_ts'], data['userid'], data['reaction'])
+    end
+
+    def reaction_remove(data)
+      q = query
+        .where('originalTs', '=', data['timestamp'])
+        .where('user', '=', data['userid'])
+        .where('reaction', '=', data['reaction'])
+        .limit(1)
+      datastore.run(q).each do |task|
+        payload = {
+          channel: task['channelID'],
+          ts: task['timestamp']
+        }
+        delete_message(payload)
+        datastore.delete(task)
+      end
+    end
+
+    def post_reply(data)
+      payload = {
+        channel: data['room'],
+        thread_ts: data['thread_ts'],
+        text: data['text'],
+        username: data['username'],
+        icon_url: data['icon_url'],
+        as_user: false,
+        reply_broadcast: data['reply_broadcast']
+      }
+
+      q = query.where('originalTs', '=', data['thread_ts']).limit(1)
+      datastore.run(q).each do |task|
+        payload[:thread_ts] = task['timestamp']
+      end
+
+      message = post_message(payload)
+      save_message(@subscription, message, data['timestamp'])
+    end
+
+    def self.start
+      subscription_names = ENV['WORMHOLE_SUBSCRIPTION_NAMES']
+      subscription_names.split(',').each do |name|
+        subscriber = new(name)
+        subscriber.subscribe
+      end
+    end
+  end
+
   module Subscribe
     def self.start
       subscription_names = ENV['WORMHOLE_SUBSCRIPTION_NAMES']
@@ -126,10 +280,10 @@ module SlackWormhole
 
     def self.remove_reaction(data)
       q = query
-          .where('originalTs', '=', data['timestamp'])
-          .where('user', '=', data['userid'])
-          .where('reaction', '=', data['reaction'])
-          .limit(1)
+        .where('originalTs', '=', data['timestamp'])
+        .where('user', '=', data['userid'])
+        .where('reaction', '=', data['reaction'])
+        .limit(1)
       datastore.run(q).each do |task|
         payload = {
           channel: task['channelID'],
@@ -141,8 +295,8 @@ module SlackWormhole
     end
 
     def self.allowed_channel?(channel)
-      allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS']
-      allowed_channels&.split(',')&.include?(channel)
+      allowed_channels = ENV['WORMHOLE_ALLOW_CHANNELS']&.split(',')
+      allowed_channels ? allowed_channels.include?(channel) : true
     end
   end
 end
