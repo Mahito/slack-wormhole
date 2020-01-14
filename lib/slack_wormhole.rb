@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 require_relative  'publish'
 require_relative  'subscribe'
 
-SlackWormhole::Subscribe.start
+SlackWormhole::Subscriber.start
 SlackWormhole::Publish.start

@@ -207,7 +207,7 @@ module SlackWormhole
     rescue Interrupt => e
       logger.error(e)
       raise Interrupt
-    rescue Exception => e
+    rescue StandardError => e
       logger.error(e)
       sleep 5
       retry

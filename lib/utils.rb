@@ -33,22 +33,26 @@ end
 def datastore
   if @datastore
     @datastore
-  else
+  elsif ENV['GOOGLE_APPLICATION_CREDENTIALS']
     @datastore = Google::Cloud::Datastore.new(
       project_id: ENV['GCP_PROJECT_ID'],
       credentials: ENV['GOOGLE_APPLICATION_CREDENTIALS']
     )
+  else
+    @datastore = Google::Cloud::Datastore.new(project_id: ENV['GCP_PROJECT_ID'])
   end
 end
 
 def pubsub
   if @pubsub
     @pubsub
-  else
+  elsif ENV['GOOGLE_APPLICATION_CREDENTIALS']
     @pubsub = Google::Cloud::Pubsub.new(
       project_id: ENV['GCP_PROJECT_ID'],
       credentials: ENV['GOOGLE_APPLICATION_CREDENTIALS']
     )
+  else
+    @pubsub = Google::Cloud::Pubsub.new(project_id: ENV['GCP_PROJECT_ID'])
   end
 end
 
