@@ -6,7 +6,7 @@ RUN gem install bundler
 WORKDIR /tmp
 COPY Gemfile Gemfile.lock ./
 ENV BUNDLE_JOBS=4
-RUN bundle install
+RUN bundle install --without test development
 
 FROM ruby:2.6-slim
 MAINTAINER Mahito <earthdragon77@gmail.com>
