@@ -44,12 +44,10 @@ module SlackWormhole
 
       rtm.on :close do |_data|
         logger.info('Received a close event from Slack')
-        rtm_start!
       end
 
       rtm.on :closed do |_data|
         logger.info('RTM connection has been closed')
-        rtm_start!
       end
 
       rtm_start!
@@ -202,14 +200,15 @@ module SlackWormhole
     private
 
     def self.rtm_start!
-      rtm.stop! if rtm.started?
       rtm.start!
     rescue Interrupt => e
       logger.error(e)
       raise Interrupt
     rescue StandardError => e
       logger.error(e)
-      sleep 5
+      raise StandardError
+    ensure
+      rtm.stop! if rtm.started?
       retry
     end
   end
