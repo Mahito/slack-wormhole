@@ -6,8 +6,13 @@ require_relative  'subscribe'
 subscribers = []
 subscription_names = ENV['WORMHOLE_SUBSCRIPTION_NAMES']
 
-SlackWormhole::Publish.start
-
 subscription_names.split(',').each do |name|
   subscribers << SlackWormhole::Subscriber.start(name)
 end
+
+begin
+  SlackWormhole::Publish.start
+rescue StandardError
+  retry
+end
+

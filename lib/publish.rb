@@ -207,9 +207,6 @@ module SlackWormhole
     rescue StandardError => e
       logger.error(e)
       raise StandardError
-    ensure
-      rtm.stop! if rtm.started?
-      retry
     end
   end
 end
