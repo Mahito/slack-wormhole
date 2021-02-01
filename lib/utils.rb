@@ -10,9 +10,9 @@ Slack::Web::Client.configure do |config|
   config.token = ENV['SLACK_API_USER_TOKEN']
   raise 'Missing ENV[SLACK_API_USER_TOKEN]!' unless config.token
 
-  STDOUT.sync = true
+  $stdout.sync = true
 
-  config.logger = Logger.new(STDOUT)
+  config.logger = Logger.new($stdout)
   config.logger.level = Logger::INFO
 end
 
@@ -20,14 +20,14 @@ Slack::RealTime::Client.configure do |config|
   config.token = ENV['SLACK_API_BOT_TOKEN']
   raise 'Missing ENV[SLACK_API_BOT_TOKEN]!' unless config.token
 
-  STDOUT.sync = true
+  $stdout.sync = true
 
-  config.logger = Logger.new(STDOUT)
+  config.logger = Logger.new($stdout)
   config.logger.level = Logger::INFO
 end
 
 def logger
-  @logger ||= Logger.new(STDOUT)
+  @logger ||= Logger.new($stdout)
 end
 
 def datastore

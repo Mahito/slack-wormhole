@@ -3,14 +3,14 @@
 require 'minitest/autorun'
 require './lib/subscribe'
 
-class UtilsTest < Minitest::Test
+class SubscribeTest < Minitest::Test
   def setup
     @subscriber = SlackWormhole::Subscriber.new('test')
     @allow_channels = ENV['WORMHOLE_ALLOW_CHANNELS']
   end
 
   def teardown
-    ENV['WORMHOLE_ALLOW_CHANNELS'] = @allow_channelsS
+    ENV['WORMHOLE_ALLOW_CHANNELS'] = @allow_channels
   end
 
   def test_subscriber_has_post_method
