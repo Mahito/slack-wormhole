@@ -78,7 +78,7 @@ module SlackWormhole
         }
 
         res = web.files_sharedPublicURL(payload)
-        data.text += "\n" + res['file']['permalink_public']
+        data.text += "\n#{res['file']['permalink_public']}"
       end
       post_message(data)
     end
@@ -179,7 +179,7 @@ module SlackWormhole
       logger.error(e)
       error_payload = {
         channel: payload[:room],
-        text: 'Error - ' + e.message,
+        text: "Error - #{e.message}",
         as_user: false
       }
       web.chat_postMessage(error_payload)
@@ -192,12 +192,10 @@ module SlackWormhole
     def self.replace_username(payload)
       text = payload[:text]
       while (match = text[/<@([UW].*?)>/, 1])
-        text.sub!('<@' + match + '>', '@' + username(user(match)))
+        text.sub!("<@#{match}>", "@#{username(user(match))}")
       end
       payload[:text] = text
     end
-
-    private
 
     def self.rtm_start!
       rtm.start!
@@ -208,5 +206,6 @@ module SlackWormhole
       logger.error(e)
       raise StandardError
     end
+    private_class_method rtm_start!
   end
 end
