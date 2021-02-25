@@ -73,7 +73,7 @@ def web
 end
 
 def channel(id)
-  web.channels_info(channel: id).channel
+  web.conversations_info(channel: id).channel
 end
 
 def user(id)
