@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'base64'
+require 'json'
 require_relative 'utils'
 
 module SlackWormhole
@@ -50,7 +52,6 @@ module SlackWormhole
         username: data['username'],
         icon_url: data['icon_url'],
         text: data['text'],
-        as_user: false,
         unfurl_links: true
       }
       message = web.chat_postMessage(payload)
@@ -88,7 +89,6 @@ module SlackWormhole
         text: ":#{data['reaction']}:",
         username: data['username'],
         icon_url: data['icon_url'],
-        as_user: false
       }
       q = query.where('originalTs', '=', data['thread_ts']).limit(1)
       datastore.run(q).each do |task|
@@ -122,7 +122,6 @@ module SlackWormhole
         text: data['text'],
         username: data['username'],
         icon_url: data['icon_url'],
-        as_user: false,
         reply_broadcast: data['reply_broadcast']
       }
 

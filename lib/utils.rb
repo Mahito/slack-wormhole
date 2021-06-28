@@ -3,22 +3,10 @@
 require 'google/cloud/datastore'
 require 'google/cloud/pubsub'
 require 'slack-ruby-client'
-require 'base64'
-require 'json'
 
 Slack::Web::Client.configure do |config|
   config.token = ENV['SLACK_API_USER_TOKEN']
   raise 'Missing ENV[SLACK_API_USER_TOKEN]!' unless config.token
-
-  $stdout.sync = true
-
-  config.logger = Logger.new($stdout)
-  config.logger.level = Logger::INFO
-end
-
-Slack::RealTime::Client.configure do |config|
-  config.token = ENV['SLACK_API_BOT_TOKEN']
-  raise 'Missing ENV[SLACK_API_BOT_TOKEN]!' unless config.token
 
   $stdout.sync = true
 
@@ -62,10 +50,6 @@ end
 
 def query
   datastore.query(ENV['WORMHOLE_ENTITY_NAME'])
-end
-
-def rtm
-  @rtm ||= Slack::RealTime::Client.new
 end
 
 def web
