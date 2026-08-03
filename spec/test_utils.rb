@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-require 'minitest/autorun'
-require 'hashie'
-require './lib/utils'
+require_relative 'test_helper'
+require 'ostruct'
+require_relative '../lib/utils'
 
 class UtilsTest < Minitest::Test
   def setup
-    @user_stub = Hashie::Mash.new
-    @user_stub.profile = Hashie::Mash.new
+    @user_stub = OpenStruct.new(profile: OpenStruct.new)
   end
 
   def test_logger_return_object
@@ -19,13 +18,37 @@ class UtilsTest < Minitest::Test
     assert_equal target.object_id, logger.object_id
   end
 
-  def test_rtm_return_object
-    assert_kind_of Slack::RealTime::Client, rtm
+  def test_slack_api_token_uses_v2_env
+    assert_equal 'test-token', Slack.config.token
   end
 
-  def test_rtm_return_same_object
-    target = rtm
-    assert_equal target.object_id, rtm.object_id
+  def test_slack_api_token_falls_back_to_legacy_env
+    original_v2_token = ENV.delete('SLACK_API_TOKEN')
+    original_legacy_token = ENV['SLACK_API_USER_TOKEN']
+    ENV['SLACK_API_USER_TOKEN'] = 'legacy-token'
+
+    load File.expand_path('../lib/utils.rb', __dir__)
+
+    assert_equal 'legacy-token', Slack.config.token
+  ensure
+    ENV['SLACK_API_TOKEN'] = original_v2_token
+    ENV['SLACK_API_USER_TOKEN'] = original_legacy_token
+    load File.expand_path('../lib/utils.rb', __dir__)
+  end
+
+  def test_slack_api_token_requires_v2_env
+    original_v2_token = ENV.delete('SLACK_API_TOKEN')
+    original_legacy_token = ENV.delete('SLACK_API_USER_TOKEN')
+
+    error = assert_raises(RuntimeError) do
+      load File.expand_path('../lib/utils.rb', __dir__)
+    end
+
+    assert_equal 'Missing ENV[SLACK_API_TOKEN]!', error.message
+  ensure
+    ENV['SLACK_API_TOKEN'] = original_v2_token
+    ENV['SLACK_API_USER_TOKEN'] = original_legacy_token
+    load File.expand_path('../lib/utils.rb', __dir__)
   end
 
   def test_web_return_object

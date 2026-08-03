@@ -2,11 +2,16 @@
 
 require 'google/cloud/datastore'
 require 'google/cloud/pubsub'
+require 'logger'
 require 'slack-ruby-client'
 
-Slack::Web::Client.configure do |config|
-  config.token = ENV['SLACK_API_USER_TOKEN']
-  raise 'Missing ENV[SLACK_API_USER_TOKEN]!' unless config.token
+def slack_api_token
+  ENV['SLACK_API_TOKEN'] || ENV['SLACK_API_USER_TOKEN']
+end
+
+Slack.configure do |config|
+  config.token = slack_api_token
+  raise 'Missing ENV[SLACK_API_TOKEN]!' unless config.token
 
   $stdout.sync = true
 

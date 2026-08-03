@@ -1,4 +1,4 @@
-FROM ruby:2.6-slim as builder
+FROM ruby:2.7-slim as builder
 RUN apt update && apt install -y \
       build-essential \
       && apt clean
@@ -8,7 +8,7 @@ COPY Gemfile Gemfile.lock ./
 ENV BUNDLE_JOBS=4
 RUN bundle install --without test development
 
-FROM ruby:2.6-slim
+FROM ruby:2.7-slim
 MAINTAINER Mahito <earthdragon77@gmail.com>
 RUN apt update && apt install -y \
       locales-all \
